@@ -21,7 +21,7 @@ function typing(element, text){
   let i = 0
   let interval = setInterval(() => {
     if(i < text.length){
-      element.innerHTML += text.chartAt(i)
+      element.innerHTML += text.charAt(i)
       i++
     }
     else {
@@ -69,6 +69,30 @@ const submit = async(e) => {
   chatContainer.scrollTop = chatContainer.scrollHeight
   const message = document.getElementById(uniqueId)
   loader(message)
+
+  const res = await fetch('http://localhost:5000', {
+    method : 'POST',
+    headers : {
+      'Content-Type' : 'application/json'
+    },
+    body : JSON.stringify({
+      prompt: data.get('prompt')
+    })
+  })
+
+  clearInterval(loadIntervel)
+  message.innerHTML = ''
+  
+  if(res.ok) {
+    const data = await res.json()
+    const parsedData = data.bot.trim()
+    typing(message,parsedData)
+  }
+  else{
+    const err = await res.text()
+    message.innerHTML = "Something went wrong"
+    alert(err)
+  }
 }
 
 form.addEventListener('submit', submit)
